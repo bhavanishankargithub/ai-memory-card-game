@@ -1,3 +1,4 @@
+import { CardCountSelector } from '../components/CardCountSelector'
 import { DifficultySelector } from '../components/DifficultySelector'
 import { GameBoard } from '../components/GameBoard'
 import { GameOverModal } from '../components/GameOverModal'
@@ -9,11 +10,14 @@ export function GamePage() {
   const {
     phase,
     difficulty,
+    totalCards,
     cards,
     remainingFlips,
     isComparing,
+    selectDifficulty,
     startGame,
     returnToMenu,
+    backToDifficulty,
     restartGame,
     handleCardClick,
   } = useGameLogic()
@@ -26,13 +30,22 @@ export function GamePage() {
         <Header
           remainingFlips={remainingFlips}
           difficulty={difficulty}
+          totalCards={totalCards}
           onRestart={restartGame}
           showStats={isPlaying}
         />
 
         <main className="mt-4">
           {phase === 'menu' && (
-            <DifficultySelector onSelect={startGame} />
+            <DifficultySelector onSelect={selectDifficulty} />
+          )}
+
+          {phase === 'setup' && difficulty && (
+            <CardCountSelector
+              difficulty={difficulty}
+              onStart={(count) => startGame(difficulty, count)}
+              onBack={backToDifficulty}
+            />
           )}
 
           {isPlaying && (

@@ -32,6 +32,29 @@ Each card click reduces remaining flips by 1.
 
 ---
 
+## Difficulty Flip Multipliers
+
+Easy:
+- Remaining flips = total cards × 4
+
+Medium:
+- Remaining flips = total cards × 3
+
+Hard:
+- Remaining flips = total cards × 2
+
+---
+
+## Card Count Input Rules
+
+- User selects difficulty first
+- Then user selects total number of cards
+- Default card count is 10
+- Total card count must always be even
+- Prevent invalid values
+
+---
+
 ## Timing Rules
 
 ### Single Card Flip

@@ -30,15 +30,32 @@ The game must remember the previous unmatched flipped card.
 
 ### Easy
 Allowed flips:
-2 × total cards
+4 × total number of cards
 
 ### Medium
 Allowed flips:
-1.5 × total cards
+3 × total number of cards
 
 ### Hard
 Allowed flips:
-1 × total cards
+2 × total number of cards
+
+---
+
+## Card Count Selection
+
+After selecting the difficulty level:
+- Show an input field for number of cards
+- Default value should be 10
+- User can customize the total number of cards
+
+---
+
+## Card Count Rules
+
+- Number of cards must always be even
+- Minimum cards: 2
+- Maximum cards: 50
 
 ---
 

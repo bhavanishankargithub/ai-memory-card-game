@@ -1,6 +1,6 @@
 export type Difficulty = 'easy' | 'medium' | 'hard'
 
-export type GamePhase = 'menu' | 'playing' | 'won' | 'lost'
+export type GamePhase = 'menu' | 'setup' | 'playing' | 'won' | 'lost'
 
 export interface CardImage {
   id: string
@@ -18,11 +18,7 @@ export interface GameCard {
   isRemoved: boolean
 }
 
-export interface GameState {
-  phase: GamePhase
-  difficulty: Difficulty | null
-  cards: GameCard[]
-  remainingFlips: number
-  firstUnmatchedId: string | null
-  isComparing: boolean
+export interface GameConfig {
+  difficulty: Difficulty
+  totalCards: number
 }

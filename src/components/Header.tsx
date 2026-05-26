@@ -4,6 +4,7 @@ import { DIFFICULTY_LABELS } from '../utils/difficulty'
 interface HeaderProps {
   remainingFlips: number
   difficulty: Difficulty | null
+  totalCards: number
   onRestart: () => void
   showStats: boolean
 }
@@ -11,6 +12,7 @@ interface HeaderProps {
 export function Header({
   remainingFlips,
   difficulty,
+  totalCards,
   onRestart,
   showStats,
 }: HeaderProps) {
@@ -22,7 +24,8 @@ export function Header({
         </h1>
         {showStats && difficulty && (
           <p className="mt-1 text-sm text-slate-400">
-            {DIFFICULTY_LABELS[difficulty].title} mode
+            {DIFFICULTY_LABELS[difficulty].title} · {totalCards} cards (
+            {totalCards / 2} pairs)
           </p>
         )}
       </div>

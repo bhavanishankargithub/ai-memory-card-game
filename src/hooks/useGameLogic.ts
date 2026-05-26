@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react'
 import type { Difficulty, GameCard, GamePhase } from '../types/game'
+import { DEFAULT_CARD_COUNT, validateCardCount } from '../utils/cardCount'
 import {
   getMaxFlips,
   MATCH_POP_ANIMATION_MS,
@@ -35,6 +36,7 @@ function flipBackPair(
 export function useGameLogic() {
   const [phase, setPhase] = useState<GamePhase>('menu')
   const [difficulty, setDifficulty] = useState<Difficulty | null>(null)
+  const [totalCards, setTotalCards] = useState(DEFAULT_CARD_COUNT)
   const [remainingFlips, setRemainingFlips] = useState(0)
   const [firstUnmatchedId, setFirstUnmatchedId] = useState<string | null>(null)
   const [isComparing, setIsComparing] = useState(false)
@@ -61,33 +63,57 @@ export function useGameLogic() {
   }, [])
 
   const startGame = useCallback(
-    (selected: Difficulty) => {
+    (selectedDifficulty: Difficulty, cardCount: number) => {
+      const validation = validateCardCount(cardCount)
+      if (!validation.valid || validation.normalized === null) {
+        return false
+      }
+
+      const count = validation.normalized
       clearScheduled()
-      const newDeck = generateDeck()
-      setDifficulty(selected)
-      setRemainingFlips(getMaxFlips(selected))
+      const newDeck = generateDeck(count)
+      setDifficulty(selectedDifficulty)
+      setTotalCards(count)
+      setRemainingFlips(getMaxFlips(selectedDifficulty, count))
       resetInteractionState()
       setPhase('playing')
       setDeck(newDeck)
+      return true
     },
     [clearScheduled, generateDeck, resetInteractionState, setDeck],
   )
+
+  const selectDifficulty = useCallback((selected: Difficulty) => {
+    clearScheduled()
+    setDifficulty(selected)
+    resetInteractionState()
+    setDeck([])
+    setPhase('setup')
+  }, [clearScheduled, resetInteractionState, setDeck])
 
   const returnToMenu = useCallback(() => {
     clearScheduled()
     setPhase('menu')
     setDifficulty(null)
+    setTotalCards(DEFAULT_CARD_COUNT)
     resetInteractionState()
     setDeck([])
   }, [clearScheduled, resetInteractionState, setDeck])
 
+  const backToDifficulty = useCallback(() => {
+    clearScheduled()
+    setDifficulty(null)
+    resetInteractionState()
+    setDeck([])
+    setPhase('menu')
+  }, [clearScheduled, resetInteractionState, setDeck])
+
   const restartGame = useCallback(() => {
     if (difficulty) {
-      startGame(difficulty)
+      startGame(difficulty, totalCards)
     }
-  }, [difficulty, startGame])
+  }, [difficulty, totalCards, startGame])
 
-  /** Auto flip-back when only one card is revealed and no second pick arrives */
   const scheduleSingleCardFlipBack = useCallback(
     (cardId: string, flipsLeft: number) => {
       schedule(() => {
@@ -124,7 +150,6 @@ export function useGameLogic() {
 
       const nextCards = updateCard(deck, cardId, { isFlipped: true })
 
-      // First card: remember it and start the 5s solo reveal timer
       if (!firstUnmatchedId) {
         clearScheduled()
         setDeck(nextCards)
@@ -134,7 +159,6 @@ export function useGameLogic() {
         return
       }
 
-      // Second card: cancel solo timer, lock input during pair resolution
       clearScheduled()
       setIsComparing(true)
 
@@ -150,7 +174,6 @@ export function useGameLogic() {
       setDeck(nextCards)
 
       if (first.pairId === second.pairId) {
-        // Match: 1.5s visible, then pop animation, then remove
         schedule(() => {
           setDeck((current) =>
             current.map((c) =>
@@ -174,7 +197,6 @@ export function useGameLogic() {
           }, MATCH_POP_ANIMATION_MS)
         }, MATCH_WAIT_MS)
       } else {
-        // Mismatch: both stay visible 3s, then flip back
         schedule(() => {
           setDeck((current) => {
             const reset = flipBackPair(current, firstId, cardId)
@@ -203,11 +225,14 @@ export function useGameLogic() {
   return {
     phase,
     difficulty,
+    totalCards,
     cards: deck,
     remainingFlips,
     isComparing,
+    selectDifficulty,
     startGame,
     returnToMenu,
+    backToDifficulty,
     restartGame,
     handleCardClick,
   }

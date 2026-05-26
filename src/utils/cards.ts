@@ -1,6 +1,6 @@
 import { CARD_IMAGES } from '../assets/cardImages'
 import type { GameCard } from '../types/game'
-import { PAIR_COUNT } from './difficulty'
+import { MAX_PAIRS } from './cardCount'
 import { shuffle } from './shuffle'
 
 let cardIdCounter = 0
@@ -10,9 +10,17 @@ function nextCardId(): string {
   return `card-${cardIdCounter}`
 }
 
-/** Build paired cards, shuffle images and positions for a new round */
-export function createShuffledDeck(): GameCard[] {
-  const images = shuffle(CARD_IMAGES.slice(0, PAIR_COUNT))
+/** Build paired cards for the requested total, then shuffle positions */
+export function createShuffledDeck(totalCards: number): GameCard[] {
+  const pairCount = totalCards / 2
+
+  if (pairCount > MAX_PAIRS || pairCount > CARD_IMAGES.length) {
+    throw new Error(
+      `Cannot create ${totalCards} cards: maximum supported is ${MAX_PAIRS * 2}`,
+    )
+  }
+
+  const images = shuffle(CARD_IMAGES.slice(0, pairCount))
 
   const pairs = images.flatMap((image) => {
     const pairId = image.id
